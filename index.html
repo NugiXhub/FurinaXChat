@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FurinaXChat</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel-2: #1c263d;
+      --text: #edf3ff;
+      --muted: #9aa9c7;
+      --primary: #3a8ef6;
+      --primary-2: #5cc8ff;
+      --danger: #ff4d6d;
+      --success: #3fe3a0;
+      --gold: #d4af37;
+      --shadow: rgba(0,0,0,0.35);
+      --bubble-me: #1f3d75;
+      --bubble-other: #1b2335;
+      --chat-bg: #0d1422;
+      --navbar: rgba(18, 26, 43, 0.96);
+      --input: rgba(255,255,255,0.06);
+      --button: #3a8ef6;
+      --warning: #ffb74d;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body.modern {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel-2: #1c263d;
+      --text: #edf3ff;
+      --muted: #9aa9c7;
+      --primary: #3a8ef6;
+      --primary-2: #5cc8ff;
+      --danger: #ff4d6d;
+      --success: #3fe3a0;
+      --gold: #d4af37;
+      --shadow: rgba(0,0,0,0.35);
+      --bubble-me: linear-gradient(135deg, #123d82, #4d63d1);
+      --bubble-other: #1b2335;
+      --chat-bg: #0d1422;
+      --navbar: rgba(18, 26, 43, 0.96);
+      --input: rgba(255,255,255,0.06);
+      --button: #3a8ef6;
+      --warning: #ffb74d;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body.kartu {
+      --bg: #f7f0ea;
+      --panel: #fff8f5;
+      --panel-2: #f3e7de;
+      --text: #1f2430;
+      --muted: #6f7688;
+      --primary: #9a7ef0;
+      --primary-2: #f4b5d0;
+      --danger: #ff5b7f;
+      --success: #69d6ab;
+      --gold: #d6b45d;
+      --shadow: rgba(104, 78, 58, 0.15);
+      --bubble-me: linear-gradient(135deg, #f6d9ff, #d9e7ff);
+      --bubble-other: #f6efe8;
+      --chat-bg: #faf4f0;
+      --navbar: rgba(255, 250, 245, 0.92);
+      --input: rgba(70, 53, 92, 0.06);
+      --button: #9a7ef0;
+      --warning: #f5b85d;
+      --border: rgba(62, 49, 60, 0.08);
+    }
+
+    body.komik {
+      --bg: #f9f295;
+      --panel: #fffef3;
+      --panel-2: #ffec9d;
+      --text: #141414;
+      --muted: #4f4f4f;
+      --primary: #ff5c5c;
+      --primary-2: #ff9f1c;
+      --danger: #ff2f52;
+      --success: #24b36b;
+      --gold: #d59600;
+      --shadow: rgba(15,15,15,0.2);
+      --bubble-me: linear-gradient(135deg, #ffd36a, #ffaad4);
+      --bubble-other: #ffe8a8;
+      --chat-bg: #fffbe0;
+      --navbar: rgba(255, 255, 255, 0.95);
+      --input: rgba(0,0,0,0.04);
+      --button: #ff4d4d;
+      --warning: #ffb84d;
+      --border: rgba(0,0,0,0.8);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+    body { overflow: hidden; }
+    button, input, textarea, select {
+      font: inherit;
+    }
+    input, textarea, select {
+      outline: none;
+      border: 1px solid var(--border);
+      background: var(--input);
+      color: var(--text);
+    }
+    .hidden { display: none !important; }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(24px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 1;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    .fingerprint-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: radial-gradient(circle at center, rgba(38,57,83,.5), #050b16 62%);
+    }
+
+    .fingerprint-wrap {
+      width: 210px;
+      height: 210px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .fingerprint-ring {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.16);
+      box-shadow: 0 0 24px rgba(67,140,255,.35); 
+      animation: spinRing 4s linear infinite;
+      background: conic-gradient(from 0deg, rgba(164,175,191,.2), rgba(58,142,246,.8), rgba(92,200,255,.9), rgba(164,175,191,.2));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 0);
+    }
+    .fingerprint-core {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2);
+      display: grid;
+      place-items: center;
+      background: rgba(18,26,43,.28);
+      backdrop-filter: blur(3px);
+      position: relative;
+      z-index: 2;
+    }
+    .fingerprint-mark {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      position: relative;
+      transform: rotate(45deg);
+      border: 2px solid rgba(255,255,255,.8);
+      box-shadow: inset 0 0 20px rgba(255,255,255,.08);
+    }
+    .fingerprint-mark::before, .fingerprint-mark::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,.82);
+    }
+    .fingerprint-mark::before {
+      width: 18px;
+      height: 18px;
+      left: 12px;
+      top: 10px;
+    }
+    .fingerprint-mark::after {
+      width: 14px;
+      height: 14px;
+      right: 12px;
+      bottom: 12px;
+    }
+    .intro-title {
+      margin-top: 20px;
+      font-size: 2rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+      text-align: center;
+      color: rgba(255,255,255,.92);
+      opacity: 1;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .intro-title.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    @keyframes spinRing {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .otp-form, .profile-form, .login-form {
+      width: min(520px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 18px 16px;
+    }
+    .login-card, .profile-card, .otp-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+    }
+    .login-card {
+      padding: 20px 18px 18px;
+      margin-top: 80px;
+    }
+    .title-main {
+      margin: 12px 0 18px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .field label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .phone-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .phone-row select, .phone-row input {
+      min-height: 46px;
+      border-radius: 12px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+    }
+    .phone-row select { width: 110px; }
+    .phone-row input { flex: 1; }
+    .primary-btn, .secondary-btn, .ghost-btn {
+      border: none;
+      border-radius: 12px;
+      min-height: 46px;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      width: 100%;
+      font-weight: 700;
+    }
+    .secondary-btn {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0 14px;
+    }
+    .ghost-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0 12px;
+    }
+    .primary-btn:hover, .secondary-btn:hover, .ghost-btn:hover { transform: translateY(-1px); }
+
+    .toast-stack {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: min(320px, calc(100vw - 20px));
+    }
+    .toast {
+      background: rgba(19, 27, 40, 0.96);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 38px rgba(0,0,0,0.26);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      transform: translateX(20px);
+      opacity: 0;
+      animation: toastIn 0.35s ease forwards;
+    }
+    @keyframes toastIn {
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .toast .spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.18);
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .countdown-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .countdown-bar > span {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      transition: width 1s linear;
+      border-radius: inherit;
+    }
+
+    .otp-card {
+      padding: 18px 16px 16px;
+      margin-top: 50px;
+    }
+    .otp-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+    .otp-box {
+      width: 46px;
+      height: 52px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.04);
+      border: 2px solid rgba(255,255,255,0.16);
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    .otp-box.filled {
+      border-color: rgba(92,200,255,0.9);
+      box-shadow: inset 0 0 0 1px rgba(92,200,255,0.8);
+    }
+    .otp-box.error {
+      border-color: var(--danger);
+      animation: shake 0.42s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+    }
+    .otp-box.success {
+      border-color: var(--success);
+      box-shadow: 0 0 12px rgba(63,227,160,0.45);
+      animation: pulseGreen 0.4s ease;
+    }
+    @keyframes pulseGreen {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .profile-card {
+      padding: 16px;
+      margin-top: 52px;
+    }
+    .upload-box {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.18);
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .upload-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .upload-box .upload-label {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: rgba(0,0,0,0.18);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      text-align: center;
+    }
+    .upload-box:hover .upload-label { opacity: 1; }
+    .profile-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .profile-grid input, .profile-grid textarea {
+      border-radius: 12px;
+      padding: 12px 14px;
+      width: 100%;
+    }
+    .profile-grid textarea { min-height: 72px; resize: vertical; }
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .profile-actions .secondary-btn, .profile-actions .primary-btn {
+      flex: 1;
+    }
+
+    .app-shell {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--chat-bg);
+      position: relative;
+    }
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--navbar);
+      border-bottom: 1px solid var(--border);
+      padding: 0 18px;
+      z-index: 30;
+    }
+    .topbar .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .avatar-mini {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,.15);
+    }
+    .avatar-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .main-app-wrap {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .content-pane {
+      flex: 1;
+      overflow: hidden;
+      background: var(--chat-bg);
+      position: relative;
+    }
+    .panel {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(20px);
+      transition: all 0.3s ease;
+      background: var(--chat-bg);
+    }
+    .panel.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .chat-list { flex: 1; overflow: auto; padding: 14px; }
+    .chat-empty {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      color: var(--muted);
+      text-align: center;
+      padding: 18px;
+    }
+    .chat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.01);
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .chat-row:hover { background: rgba(255,255,255,0.04); border-color: var(--border); }
+    .chat-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      flex-shrink: 0;
+    }
+    .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .chat-name { font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3ea7ff, #4f7cff);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(79,124,255,0.4);
+    }
+    .chat-meta { color: var(--muted); font-size: 0.73rem; }
+    .chat-preview {
+      color: var(--muted);
+      font-size: 0.79rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 4px;
+    }
+    .fab-add {
+      position: absolute;
+      right: 20px;
+      bottom: 86px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      font-size: 2rem;
+      line-height: 1;
+      box-shadow: 0 12px 22px rgba(58,142,246,.35);
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .nav-bar {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 2px;
+      background: var(--navbar);
+      border-top: 1px solid var(--border);
+      height: 68px;
+      padding: 0 8px;
+      z-index: 30;
+    }
+    .nav-item {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.68rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+    .nav-item.active {
+      color: var(--text);
+    }
+    .nav-item.active::after {
+      content: "";
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      width: 26px;
+      height: 3px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    }
+    .nav-ico {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .conversation-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--chat-bg);
+    }
+    .conversation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .conv-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .conv-user strong { font-size: 1rem; }
+    .conv-status { color: var(--muted); font-size: 0.72rem; }
+    .conv-actions { display: flex; gap: 8px; }
+    .messages-area {
+      flex: 1;
+      overflow: auto;
+      padding: 18px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+    }
+    .message {
+      max-width: min(72%, 420px);
+      width: fit-content;
+      border-radius: 16px;
+      padding: 10px 12px 8px;
+      position: relative;
+      animation: bubbleIn 0.25s ease;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.12);
+      border: 1px solid transparent;
+    }
+    @keyframes bubbleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .message.me {
+      align-self: flex-end;
+      background: var(--bubble-me);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .message.other {
+      align-self: flex-start;
+      background: var(--bubble-other);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .message.dev {
+      background: linear-gradient(135deg, rgba(16,20,38,0.95), rgba(67,36,110,0.95));
+      border: 1px solid rgba(212,175,55,0.7);
+      box-shadow: 0 0 18px rgba(212,175,55,0.22);
+    }
+    .message .sender {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      opacity: 0.88;
+    }
+    .message .meta {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.74);
+    }
+    .status-ticks {
+      display: inline-flex;
+      gap: 2px;
+      align-items: center;
+    }
+    .status-ticks span {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.78rem;
+    }
+    .message.me .status-ticks span.sent-1 { color: rgba(255,255,255,0.8); }
+    .message.me .status-ticks span.sent-2 { color: rgba(255,255,255,0.8); }
+    .message.me .status-ticks span.read { color: #6bb8ff; }
+    .text-text { line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+    .text-text strong { font-weight: 800; }
+    .text-text em { font-style: italic; }
+    .text-text s { text-decoration: line-through; }
+    .reply-box {
+      background: rgba(255,255,255,0.08);
+      border-left: 3px solid var(--primary);
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+    .media-preview {
+      width: min(260px, 100%); 
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
+    }
+    .media-preview img, .media-preview video { width: 100%; display: block; }
+    .voice-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      min-width: 180px;
+    }
+    .voice-bars {
+      display: flex;
+      align-items: end;
+      gap: 3px;
+      height: 18px;
+    }
+    .voice-bars span {
+      display: block;
+      width: 4px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.8);
+      animation: beat 1s ease-in-out infinite alternate;
+    }
+    .voice-bars span:nth-child(2){ height: 10px; animation-delay: 0.15s; }
+    .voice-bars span:nth-child(3){ height: 16px; animation-delay: 0.3s; }
+    .voice-bars span:nth-child(4){ height: 12px; animation-delay: 0.45s; }
+    .voice-bars span:nth-child(5){ height: 18px; animation-delay: 0.6s; }
+    .voice-bars span:nth-child(6){ height: 9px; animation-delay: 0.75s; }
+    @keyframes beat {
+      from { height: 6px; opacity: 0.5; }
+      to { height: 18px; opacity: 1; }
+    }
+    .composer {
+      padding: 12px 14px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .composer-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px 10px;
+    }
+    .composer textarea {
+      flex: 1;
+      resize: none;
+      min-height: 42px;
+      max-height: 120px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+    .composer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .small-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(6,10,18,0.65);
+      z-index: 1000;
+    }
+    .modal.hidden { display: none; }
+    .modal-card {
+      width: min(480px, calc(100% - 22px));
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 44px rgba(0,0,0,0.28);
+      padding: 16px;
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .modal-body { display: grid; gap: 10px; }
+    .field-inline { display: flex; gap: 10px; }
+    .field-inline > * { flex: 1; }
+    .close-x { background: transparent; color: var(--text); border: none; cursor: pointer; font-size: 1.3rem; }
+
+    .settings-panel {
+      padding: 18px;
+      overflow: auto;
+    }
+    .settings-list {
+      display: grid;
+      gap: 10px;
+    }
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+    }
+    .settings-item .text {
+      font-weight: 700;
+    }
+    .settings-item .hint {
+      color: var(--muted);
+      font-size: 0.73rem;
+    }
+    .setting-section { padding: 16px 0; }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+    .theme-card {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      text-align: center;
+      cursor: pointer;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-card.active {
+      box-shadow: inset 0 0 0 2px var(--primary);
+    }
+    .theme-swatch {
+      width: 100%;
+      height: 56px;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .theme-swatch.modern { background: linear-gradient(135deg, #0b1020, #1b2a43); }
+    .theme-swatch.kartu { background: linear-gradient(135deg, #f8efe8, #dfe9ff); }
+    .theme-swatch.komik { background: linear-gradient(135deg, #fef29d, #ffb8b8); }
+
+    .placeholder-box {
+      border: 1px dashed var(--border);
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .telepon-banner {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      text-align: center;
+      padding: 18px;
+      color: var(--muted);
+    }
+    .telepon-banner .big { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .telepon-banner .tag { margin-top: 8px; font-size: 0.9rem; }
+
+    .dev-panel {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .dev-section {
+      background: rgba(212,175,55,0.06);
+      border: 1px solid rgba(212,175,55,0.35);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .dev-list { display: grid; gap: 8px; }
+    .dev-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.02);
+    }
+    .small-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .small-actions button {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 7px 8px;
+      cursor: pointer;
+    }
+
+    .list-dim {
+      opacity: 0.68;
+    }
+    .status-pill {
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+    }
+    .status-pill.pending { color: var(--warning); }
+    .status-pill.approved { color: var(--success); }
+    .status-pill.rejected { color: var(--danger); }
+
+    .mini-chips {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    input[type="file"] { display: none; }
+
+    @media (max-width: 700px) {
+      .theme-grid { grid-template-columns: 1fr; }
+      .phone-row { flex-direction: column; }
+      .phone-row select, .phone-row input { width: 100%; }
+      .nav-item { font-size: 0.62rem; }
+      .message { max-width: 82%; }
+    }
+  </style>
+</head>
+<body class="modern">
+  <div class="toast-stack" id="toastStack"></div>
+
+  <div id="introScreen" class="screen fingerprint-screen active">
+    <div class="fingerprint-wrap" id="fingerprintTrigger">
+      <div class="fingerprint-ring"></div>
+      <div class="fingerprint-core">
+        <div class="fingerprint-mark"></div>
+      </div>
+    </div>
+    <div id="introTitle" class="intro-title">Tekan untuk Membuka FurinaXChat</div>
+  </div>
+
+  <div id="loginScreen" class="screen">
+    <form class="login-form" id="loginForm">
+      <div class="login-card">
+        <div class="title-main">Masuk ke FurinaXChat</div>
+        <div class="field">
+          <label>Nomor Telepon</label>
+          <div class="phone-row">
+            <select id="countryCode">
+              <option value="+62">+62</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+65">+65</option>
+              <option value="+81">+81</option>
+            </select>
+            <input id="phoneInput" type="tel" placeholder="Contoh: 81234567890" maxlength="20" />
+          </div>
+        </div>
+        <button type="submit" class="primary-btn">Kirim Kode OTP</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="otpScreen" class="screen">
+    <div class="otp-form">
+      <div class="otp-card">
+        <div class="title-main">Masukkan Kode OTP</div>
+        <div class="otp-row" id="otpRow">
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+        </div>
+        <button class="primary-btn" id="verifyOtpBtn">Verifikasi</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="profileScreen" class="screen">
+    <div class="profile-form">
+      <div class="profile-card">
+        <div class="title-main">Setup Profil</div>
+        <input id="profileImageInput" type="file" accept="image/*" />
+        <div class="upload-box" id="uploadBox" aria-label="Upload foto profil">
+          <img id="profilePreview" alt="Preview foto profil" />
+          <div class="upload-label">Upload Foto</div>
+        </div>
+        <div class="profile-grid">
+          <div class="field">
+            <label>Nama</label>
+            <input id="nameInput" type="text" placeholder="Nama wajib" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input id="emailInput" type="email" placeholder="Opsional" />
+          </div>
+          <div class="field">
+            <label>Bio</label>
+            <textarea id="bioInput" placeholder="Opsional"></textarea>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="secondary-btn" id="skipProfileBtn" type="button">Lewati</button>
+          <button class="primary-btn" id="startAppBtn" type="button">Mulai</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="appShell" class="screen" aria-live="polite">
+    <div class="app-shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="avatar-mini" id="topAvatarMini"></div>
+          <span>FurinaXChat</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="settingsBtn" title="Pengaturan">⚙</button>
+          <button class="icon-btn" id="logoutBtn" title="Logout">⇠</button>
+        </div>
+      </div>
+
+      <div class="main-app-wrap">
+        <div class="content-pane">
+          <div id="chatPanel" class="panel active">
+            <div class="chat-panel">
+              <div class="chat-list" id="chatList"></div>
+            </div>
+          </div>
+
+          <div id="updatePanel" class="panel">
+            <div class="placeholder-box" style="margin: 18px; height: calc(100% - 36px); display:grid; place-items:center;">
+              <div>
+                <h3 style="margin:0 0 8px;">Update</h3>
+                <p style="margin:0; color:var(--muted);">Belum ada pembaruan untuk akun Anda.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="saluranPanel" class="panel">
+            <div class="placeholder-box" style="margin: 18px; height: calc(100% - 36px); display:grid; place-items:center;">
+              <div>
+                <h3 style="margin:0 0 8px;">Saluran</h3>
+                <p style="margin:0; color:var(--muted);">Belum ada saluran yang dibuat.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="komunitasPanel" class="panel">
+            <div class="placeholder-box" style="margin: 18px; height: calc(100% - 36px); display:grid; place-items:center;">
+              <div>
+                <h3 style="margin:0 0 8px;">Komunitas</h3>
+                <p style="margin:0; color:var(--muted);">Belum ada grup yang dibuka.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="teleponPanel" class="panel">
+            <div class="telepon-banner">
+              <div>
+                <div class="big">Segera Hadir</div>
+                <div class="tag">Fitur ini membutuhkan server</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="settingsPanel" class="panel">
+            <div class="settings-panel">
+              <div class="settings-list" id="settingsList"></div>
+            </div>
+          </div>
+
+          <div id="conversationPanel" class="panel">
+            <div class="conversation-panel">
+              <div class="conversation-header">
+                <div class="conv-user">
+                  <div class="chat-avatar" id="conversationAvatar"></div>
+                  <div>
+                    <strong id="conversationName">Kontak</strong>
+                    <div class="conv-status" id="conversationStatus">Online</div>
+                  </div>
+                </div>
+                <div class="conv-actions">
+                  <button class="icon-btn" type="button" id="backToChatBtn">←</button>
+                </div>
+              </div>
+              <div class="messages-area" id="messagesArea"></div>
+              <div class="composer">
+                <div class="composer-inner">
+                  <textarea id="messageInput" rows="1" placeholder="Ketik pesan..."></textarea>
+                  <div class="composer-actions">
+                    <label class="small-btn" title="Gambar" for="mediaImageInput">🖼</label>
+                    <input id="mediaImageInput" type="file" accept="image/*" />
+                    <label class="small-btn" title="Video" for="mediaVideoInput">🎬</label>
+                    <input id="mediaVideoInput" type="file" accept="video/*" />
+                    <button class="small-btn" type="button" id="voiceButton" title="Pesan suara">🎙</button>
+                    <button class="send-btn" type="button" id="sendMessageBtn">➤</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="fab-add" id="addContactFab" type="button">+</button>
+        </div>
+      </div>
+
+      <div class="nav-bar" id="navBar">
+        <button class="nav-item active" data-tab="chat"><span class="nav-ico">💬</span><span>Chat</span></button>
+        <button class="nav-item" data-tab="update"><span class="nav-ico">📰</span><span>Update</span></button>
+        <button class="nav-item" data-tab="saluran"><span class="nav-ico">📢</span><span>Saluran</span></button>
+        <button class="nav-item" data-tab="komunitas"><span class="nav-ico">👥</span><span>Komunitas</span></button>
+        <button class="nav-item" data-tab="telepon"><span class="nav-ico">📞</span><span>Telepon</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="contactModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 style="margin:0;">Tambah Kontak</h3>
+        <button type="button" class="close-x" data-close="contactModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Nomor Telepon</label>
+          <input id="newContactInput" type="tel" placeholder="Masukkan nomor" />
+        </div>
+        <button type="button" class="primary-btn" id="lookupContactBtn">Cari Kontak</button>
+        <div id="contactLookupResult" class="placeholder-box" style="padding: 12px;">Nomor belum dicari.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 style="margin:0;">Pengaturan</h3>
+        <button type="button" class="close-x" data-close="settingsModal">×</button>
+      </div>
+      <div class="modal-body" id="settingsModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'furinaxchat_state_v2';
+    const DEVELOPER_PHONE = '+62-800-DEV-001';
+
+    const defaultState = () => ({
+      users: {},
+      contacts: {},
+      chats: [],
+      groups: [],
+      channels: [],
+      recoveryQueue: [],
+      verificationQueue: [],
+      suspiciousLogs: [],
+      loggedInPhone: null,
+      currentConversationId: null,
+      pendingOtp: null,
+      pendingOtpTarget: null,
+      otpCountdown: 120,
+      banning: []
+    });
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : defaultState();
+      } catch (e) {
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+    let currentTab = 'chat';
+    let timerInterval = null;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function normalizePhone(value) {
+      if (!value) return '';
+      let clean = String(value).trim().toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+      if (clean.startsWith('0')) clean = '+62' + clean.substring(1);
+      if (!clean.startsWith('+')) clean = '+' + clean;
+      return clean;
+    }
+
+    function ensureSeedUsers() {
+      const demo = {
+        '+6281234567890': { phone: '+62 81234567890', name: 'Aurel', email: 'aurel@furinaxchat.id', bio: 'Creative storyteller.', theme: 'modern', photo: '', role: 'user', blueVerified: false },
+        '+628112003344': { phone: '+62 8112003344', name: 'Nadia', email: 'nadia@furinaxchat.id', bio: 'Design enthusiast.', theme: 'kartu', photo: '', role: 'user', blueVerified: false },
+        '+62800dev001': { phone: DEVELOPER_PHONE, name: 'Developer Furina', email: 'dev@furinaxchat.id', bio: 'Maintainer system', theme: 'modern', photo: '', role: 'developer', blueVerified: true }
+      };
+      for (const key in demo) {
+        if (!state.users[key]) {
+          state.users[key] = demo[key];
+        }
+      }
+      saveState();
+    }
+
+    function getCurrentUser() {
+      return state.loggedInPhone ? (state.users[normalizePhone(state.loggedInPhone)] || null) : null;
+    }
+
+    function setCurrentUser(userPhone) {
+      state.loggedInPhone = userPhone;
+      saveState();
+      applyThemeToBody();
+      renderUserAvatar();
+    }
+
+    function applyThemeToBody() {
+      const user = getCurrentUser();
+      const theme = user && user.theme ? user.theme : 'modern';
+      document.body.classList.remove('modern', 'kartu', 'komik');
+      document.body.classList.add(theme);
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach((screen) => {
+        screen.classList.toggle('active', screen.id === id);
+      });
+    }
+
+    function showToast(message, type = 'info') {
+      const stack = document.getElementById('toastStack');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <div class="toast-header">
+          <span>${type === 'otp' ? 'OTP' : 'Info'}</span>
+          <span class="toast-status">${type === 'loading' ? '<span class="spinner"></span>' : ''}</span>
+        </div>
+        <div>${message}</div>
+        ${type === 'countdown' ? '<div class="countdown-bar"><span id="otpProgressBar"></span></div>' : ''}
+        ${type === 'otp' ? '<div style="margin-top:10px; display:flex; gap:8px;"><button class="secondary-btn" id="copyOtpBtn" type="button">Salin</button></div>' : ''}
+      `;
+      stack.appendChild(toast);
+      if (type === 'countdown') {
+        let remaining = 120;
+        const progress = toast.querySelector('#otpProgressBar');
+        const tick = () => {
+          remaining -= 1;
+          const percent = (remaining / 120) * 100;
+          progress.style.width = `${Math.max(0, percent)}%`;
+          if (remaining <= 0) {
+            clearInterval(timer);
+          }
+        };
+        const timer = setInterval(tick, 1000);
+      }
+      if (type === 'otp') {
+        const copyBtn = toast.querySelector('#copyOtpBtn');
+        copyBtn.onclick = () => {
+          const otp = state.pendingOtp || '000000';
+          navigator.clipboard.writeText(otp).catch(() => {});
+          copyBtn.textContent = 'Tersalin';
+        };
+      }
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 200);
+      }, type === 'countdown' ? 128000 : 4200);
+    }
+
+    function generateOtp() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    function startOtpCountdown() {
+      state.pendingOtp = generateOtp();
+      state.pendingOtpTarget = normalizePhone(document.getElementById('phoneInput').value || '');
+      state.otpCountdown = 120;
+      saveState();
+      showToast('Kode OTP sedang diproses...', 'loading');
+      const progressBar = document.createElement('div');
+      progressBar.style.marginTop = '10px';
+      progressBar.innerHTML = '<div class="countdown-bar"><span></span></div>';
+      const stack = document.getElementById('toastStack');
+      const toast = stack.lastChild;
+      if (toast) {
+        toast.appendChild(progressBar.firstChild);
+      }
+      let remaining = 120;
+      const interval = setInterval(() => {
+        remaining -= 1;
+        state.otpCountdown = remaining;
+        const toastEl = document.querySelector('.toast');
+        if (toastEl) {
+          const bar = toastEl.querySelector('.countdown-bar span');
+          if (bar) bar.style.width = `${(remaining / 120) * 100}%`;
+        }
+        if (remaining <= 0) {
+          clearInterval(interval);
+          showToast(`Kode OTP: ${state.pendingOtp}`, 'otp');
+          showScreen('otpScreen');
+        }
+      }, 1000);
+    }
+
+    function createOrUpdateUser(phone, fields) {
+      const key = normalizePhone(phone);
+      const current = state.users[key] || { theme: 'modern', photo: '', role: 'user', blueVerified: false };
+      const merged = { ...current, ...fields, phone: fields.phone || current.phone || phone };
+      state.users[key] = merged;
+      saveState();
+      return merged;
+    }
+
+    function loginWithPhone(phone) {
+      const normalized = normalizePhone(phone);
+      const user = state.users[normalized];
+      if (!user) {
+        showToast('Nomor belum terdaftar di FurinaXChat');
+        return;
+      }
+      if (state.banning.includes(normalized)) {
+        showToast('Akun Anda telah dibanned. Ajukan pemulihan.');
+        showRecoveryState();
+        return;
+      }
+      setCurrentUser(normalized);
+      showScreen('appShell');
+      renderAll();
+    }
+
+    function showRecoveryState() {
+      const main = document.getElementById('settingsModalBody');
+      main.innerHTML = `
+        <div class="setting-section">
+          <div class="placeholder-box">
+            <h4 style="margin-top:0;">Akun Anda telah dibanned. Ajukan pemulihan.</h4>
+            <textarea id="recoveryReason" rows="4" placeholder="Tuliskan alasan pemulihan..."></textarea>
+            <div style="margin-top:10px; display:flex; gap:10px;">
+              <button class="primary-btn" id="submitRecoveryBtn" type="button">Ajukan Pemulihan</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('submitRecoveryBtn').onclick = () => {
+        const reason = document.getElementById('recoveryReason').value.trim();
+        if (!reason) {
+          showToast('Alasan pemulihan wajib diisi');
+          return;
+        }
+        state.recoveryQueue.push({ phone: state.loggedInPhone, reason, status: 'pending' });
+        saveState();
+        showToast('Permintaan pemulihan dikirim ke Dev Panel');
+        document.getElementById('settingsModal').classList.add('hidden');
+      };
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function setupProfile() {
+      const rawName = document.getElementById('nameInput').value.trim();
+      if (!rawName) {
+        showToast('Nama wajib diisi');
+        return;
+      }
+      const phone = document.getElementById('phoneInput').value || state.pendingOtpTarget || '';
+      const user = createOrUpdateUser(phone, {
+        phone: phone,
+        name: rawName,
+        email: document.getElementById('emailInput').value.trim(),
+        bio: document.getElementById('bioInput').value.trim(),
+        role: normalizePhone(phone) === normalizePhone(DEVELOPER_PHONE) ? 'developer' : 'user',
+        theme: 'modern',
+        photo: document.getElementById('profilePreview').src || '',
+        blueVerified: normalizePhone(phone) === normalizePhone(DEVELOPER_PHONE)
+      });
+      setCurrentUser(normalizePhone(phone));
+      showScreen('appShell');
+      renderAll();
+    }
+
+    function renderAll() {
+      renderContactList();
+      renderNav();
+      renderSettings();
+      renderUserAvatar();
+      renderActivePanel();
+      renderDevPanelIfNeeded();
+    }
+
+    function renderUserAvatar() {
+      const user = getCurrentUser();
+      const avatar = document.getElementById('topAvatarMini');
+      if (!user) return;
+      avatar.innerHTML = user.photo ? `<img src="${user.photo}" alt="${user.name}" />` : `<span style="font-size:0.74rem; font-weight:700;">${user.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>`;
+    }
+
+    function renderNav() {
+      const tabs = document.querySelectorAll('.nav-item');
+      tabs.forEach((item) => {
+        item.classList.toggle('active', item.dataset.tab === currentTab);
+      });
+    }
+
+    function renderActivePanel() {
+      const panels = ['chatPanel', 'updatePanel', 'saluranPanel', 'komunitasPanel', 'teleponPanel', 'settingsPanel', 'conversationPanel'];
+      panels.forEach((id) => {
+        const panel = document.getElementById(id);
+        if (!panel) return;
+        const isActive = (() => {
+          if (id === 'chatPanel') return currentTab === 'chat' && !state.currentConversationId;
+          if (id === 'conversationPanel') return !!state.currentConversationId;
+          if (id === 'settingsPanel') return currentTab === 'settings';
+          return id === `${currentTab}Panel`;
+        })();
+        panel.classList.toggle('active', isActive);
+      });
+      document.getElementById('addContactFab').style.display = currentTab === 'chat' ? 'block' : 'none';
+    }
+
+    function renderContactList() {
+      const list = document.getElementById('chatList');
+      const contacts = Object.values(state.contacts).filter(Boolean);
+      if (!contacts.length) {
+        list.innerHTML = '<div class="chat-empty">Belum ada kontak. Tekan tombol tambah untuk mulai.</div>';
+        return;
+      }
+      list.innerHTML = contacts.map((contact) => {
+        const subtitle = state.chats.find((c) => c.contactPhone === contact.phone)?.lastMessage || 'Mulai chat';
+        const hasVerified = contact.blueVerified || isPhoneVerified(contact.phone);
+        return `
+          <div class="chat-row" data-phone="${contact.phone}">
+            <div class="chat-avatar">${contact.photo ? `<img src="${contact.photo}" alt="${contact.name}" />` : `<span style="display:grid; place-items:center; width:100%; height:100%; font-weight:700;">${contact.name.charAt(0).toUpperCase()}</span>`}</div>
+            <div class="chat-info">
+              <div class="chat-head">
+                <div class="chat-name">${contact.name}${hasVerified ? '<span class="verified-badge">✓</span>' : ''}</div>
+                <div class="chat-meta">baru</div>
+              </div>
+              <div class="chat-preview">${subtitle}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      list.querySelectorAll('.chat-row').forEach((row) => {
+        row.onclick = () => openConversation(row.dataset.phone);
+      });
+    }
+
+    function renderConversation() {
+      const conversation = getConversationByPhone(state.currentConversationId);
+      const messagesArea = document.getElementById('messagesArea');
+      if (!conversation) {
+        messagesArea.innerHTML = '<div class="chat-empty">Mulai percakapan baru.</div>';
+        return;
+      }
+      const user = getUserByPhone(state.currentConversationId);
+      const contactName = user ? user.name : state.currentConversationId;
+      document.getElementById('conversationName').textContent = contactName;
+      document.getElementById('conversationStatus').textContent = 'Online';
+      const avatar = document.getElementById('conversationAvatar');
+      avatar.innerHTML = user && user.photo ? `<img src="${user.photo}" alt="${user.name}" />` : `<span style="display:grid; place-items:center; width:100%; height:100%; font-weight:700;">${(contactName || 'U').charAt(0).toUpperCase()}</span>`;
+      messagesArea.innerHTML = conversation.messages.map((msg) => {
+        let body = '';
+        const formattedText = (msg.text || '').replace(/\*(.+?)\*/g, '<strong>$1</strong>').replace(/_(.+?)_/g, '<em>$1</em>').replace(/~(.+?)~/g, '<s>$1</s>');
+        if (msg.type === 'text') {
+          body = `<div class="text-text">${formattedText}</div>`;
+        }
+        if (msg.type === 'image') {
+          body = `<div class="media-preview"><img src="${msg.media}" alt="image" /></div>`;
+        }
+        if (msg.type === 'video') {
+          body = `<div class="media-preview"><video controls src="${msg.media}"></video></div>`;
+        }
+        if (msg.type === 'voice') {
+          body = `
+            <div class="voice-box">
+              <div class="voice-bars"><span style="height:8px"></span><span></span><span></span><span></span><span></span><span></span></div>
+              <span style="font-size:0.72rem; opacity:0.8;">0:20</span>
+            </div>
+          `;
+        }
+        const replyHtml = msg.reply ? `<div class="reply-box">${msg.reply}</div>` : '';
+        const senderTag = msg.sender === 'dev' ? '<span class="verified-badge">✓</span>' : '';
+        const statusHtml = msg.sender === 'me' ? `
+          <div class="status-ticks">
+            <span class="${msg.status === 'sent' ? 'sent-1' : msg.status === 'delivered' ? 'sent-2' : msg.status === 'read' ? 'read' : ''}">✓</span>
+            <span class="${msg.status === 'delivered' ? 'sent-2' : msg.status === 'read' ? 'read' : ''}">✓</span>
+            <span class="${msg.status === 'read' ? 'read' : ''}">✓</span>
+          </div>` : '';
+        return `
+          <div class="message ${msg.sender === 'me' ? 'me' : 'other'} ${msg.sender === 'dev' ? 'dev' : ''}">
+            <div class="sender">${msg.sender === 'dev' ? 'Developer' : msg.sender === 'me' ? 'Anda' : contactName}${senderTag}</div>
+            ${replyHtml}
+            ${body}
+            <div class="meta">${msg.time || 'now'} ${statusHtml}</div>
+          </div>
+        `;
+      }).join('');
+      if (messagesArea.scrollTo) messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function getConversationByPhone(phone) {
+      return state.chats.find((chat) => chat.contactPhone === phone) || null;
+    }
+
+    function openConversation(phone) {
+      state.currentConversationId = phone;
+      currentTab = 'chat';
+      renderActivePanel();
+      renderConversation();
+      const top = document.getElementById('conversationPanel');
+      const chat = document.getElementById('chatPanel');
+      chat.classList.remove('active');
+      top.classList.add('active');
+      currentTab = 'chat';
+      renderNav();
+    }
+
+    function closeConversation() {
+      state.currentConversationId = null;
+      renderActivePanel();
+    }
+
+    function getUserByPhone(phone) {
+      const key = normalizePhone(phone);
+      return state.users[key] || null;
+    }
+
+    function isPhoneVerified(phone) {
+      const key = normalizePhone(phone);
+      const user = state.users[key];
+      return !!(user && user.blueVerified);
+    }
+
+    function sendMessage() {
+      const phone = state.currentConversationId;
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      if (!phone) return;
+      if (!text && !pendingMedia) return;
+      const conversation = getConversationByPhone(phone) || { contactPhone: phone, messages: [] };
+      const msg = {
+        id: Date.now(),
+        sender: 'me',
+        type: pendingMedia ? pendingMedia.type : 'text',
+        text: pendingMedia ? '' : text,
+        media: pendingMedia ? pendingMedia.data : '',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'sent',
+        reply: pendingReply || null
+      };
+      conversation.messages.push(msg);
+      conversation.lastMessage = pendingMedia ? 'Media terkirim' : text;
+      if (!state.chats.find((chat) => chat.contactPhone === phone)) state.chats.push(conversation);
+      else {
+        const index = state.chats.findIndex((chat) => chat.contactPhone === phone);
+        state.chats[index] = conversation;
+      }
+      pendingMedia = null;
+      pendingReply = null;
+      input.value = '';
+      saveState();
+      renderContactList();
+      renderConversation();
+    }
+
+    let pendingMedia = null;
+    let pendingReply = null;
+
+    document.getElementById('fingerprintTrigger').onclick = () => {
+      const introTitle = document.getElementById('introTitle');
+      introTitle.classList.add('fade-out');
+      setTimeout(() => {
+        introTitle.textContent = 'Verifikasi Berhasil';
+        introTitle.classList.remove('fade-out');
+      }, 400);
+      setTimeout(() => {
+        showScreen('loginScreen');
+      }, 1000);
+    };
+
+    document.getElementById('loginForm').onsubmit = (event) => {
+      event.preventDefault();
+      const phone = `${document.getElementById('countryCode').value}${document.getElementById('phoneInput').value}`;
+      if (!phone.trim() || !document.getElementById('phoneInput').value.trim()) {
+        showToast('Nomor telepon wajib diisi');
+        return;
+      }
+      const normalized = normalizePhone(phone);
+      const user = state.users[normalized];
+      if (normalized === normalizePhone(DEVELOPER_PHONE)) {
+        state.loggedInPhone = normalized;
+        createOrUpdateUser(normalized, {
+          phone: DEVELOPER_PHONE,
+          name: 'Developer Furina',
+          email: 'dev@furinaxchat.id',
+          bio: 'Maintainer system',
+          theme: 'modern',
+          photo: '',
+          role: 'developer',
+          blueVerified: true
+        });
+        setCurrentUser(normalized);
+        showScreen('appShell');
+        renderAll();
+        return;
+      }
+      if (user && state.banning.includes(normalized)) {
+        state.loggedInPhone = normalized;
+        showRecoveryState();
+        return;
+      }
+      if (!user) {
+        showToast('Nomor ini belum terdaftar di FurinaXChat');
+      }
+      startOtpCountdown();
+    };
+
+    document.getElementById('verifyOtpBtn').onclick = () => {
+      const boxes = [...document.querySelectorAll('.otp-box')];
+      const entered = boxes.map((box) => box.value).join('');
+      if (entered.length !== 6) {
+        boxes.forEach((box) => box.classList.add('error'));
+        setTimeout(() => boxes.forEach((box) => box.classList.remove('error')), 500);
+        return;
+      }
+      if (entered === (state.pendingOtp || '')) {
+        boxes.forEach((box) => box.classList.add('success'));
+        setTimeout(() => {
+          const phone = state.pendingOtpTarget || document.getElementById('phoneInput').value;
+          const normalized = normalizePhone(phone);
+          const existingUser = state.users[normalized];
+          if (!existingUser) {
+            createOrUpdateUser(phone, { phone: phone, name: '', email: '', bio: '', theme: 'modern', photo: '', role: 'user', blueVerified: false });
+          }
+          document.getElementById('nameInput').value = existingUser ? existingUser.name || '' : '';
+          document.getElementById('emailInput').value = existingUser ? existingUser.email || '' : '';
+          document.getElementById('bioInput').value = existingUser ? existingUser.bio || '' : '';
+          if (existingUser && existingUser.photo) {
+            document.getElementById('profilePreview').src = existingUser.photo;
+          }
+          showScreen('profileScreen');
+        }, 600);
+      } else {
+        boxes.forEach((box) => box.classList.add('error'));
+        setTimeout(() => boxes.forEach((box) => box.classList.remove('error')), 500);
+      }
+    };
+
+    document.getElementById('startAppBtn').onclick = setupProfile;
+    document.getElementById('skipProfileBtn').onclick = () => {
+      const phone = document.getElementById('phoneInput').value || state.pendingOtpTarget || '';
+      if (!phone) {
+        showToast('Nomor telepon tidak tersedia');
+        return;
+      }
+      const user = createOrUpdateUser(phone, {
+        phone: phone,
+        name: 'Pengguna Baru',
+        email: '',
+        bio: '',
+        role: 'user',
+        theme: 'modern',
+        photo: '',
+        blueVerified: false
+      });
+      setCurrentUser(normalizePhone(phone));
+      showScreen('appShell');
+      renderAll();
+    };
+
+    document.getElementById('logoutBtn').onclick = () => {
+      state.loggedInPhone = null;
+      saveState();
+      showScreen('loginScreen');
+    };
+
+    document.getElementById('settingsBtn').onclick = () => {
+      currentTab = 'settings';
+      openSettings();
+    };
+
+    function openSettings() {
+      renderSettings();
+      document.getElementById('settingsPanel').classList.add('active');
+      document.getElementById('chatPanel').classList.remove('active');
+      document.getElementById('updatePanel').classList.remove('active');
+      document.getElementById('saluranPanel').classList.remove('active');
+      document.getElementById('komunitasPanel').classList.remove('active');
+      document.getElementById('teleponPanel').classList.remove('active');
+      document.getElementById('conversationPanel').classList.remove('active');
+      renderNav();
+    }
+
+    function renderSettings() {
+      const panel = document.getElementById('settingsList');
+      const user = getCurrentUser();
+      if (!user) return;
+      const isDev = user.role === 'developer' || normalizePhone(user.phone) === normalizePhone(DEVELOPER_PHONE);
+      panel.innerHTML = `
+        <div class="settings-item" data-action="edit-profile"><div><div class="text">Edit Profil</div><div class="hint">Foto, nama, email, bio</div></div><span>›</span></div>
+        <div class="settings-item" data-action="premium"><div><div class="text">Premium</div><div class="hint">Fitur eksklusif</div></div><span>›</span></div>
+        <div class="settings-item" data-action="theme"><div><div class="text">Ganti Tema</div><div class="hint">Modern / Kartu / Komik</div></div><span>›</span></div>
+        <div class="settings-item" data-action="decorate"><div><div class="text">Hias Profil</div><div class="hint">Frame, badge, bubble</div></div><span>›</span></div>
+        <div class="settings-item" data-action="privacy"><div><div class="text">Privasi</div><div class="hint">Foto & last seen</div></div><span>›</span></div>
+        <div class="settings-item" data-action="notifications"><div><div class="text">Notifikasi</div><div class="hint">Toggle on/off</div></div><span>›</span></div>
+        <div class="settings-item" data-action="logout"><div><div class="text">Logout</div><div class="hint">Keluar akun</div></div><span>›</span></div>
+        ${isDev ? `<div class="dev-panel"><h4 style="margin:0 0 8px;">Developer Panel</h4><div class="dev-list"><div class="dev-item"><span>Ban Kontak</span><button type="button" data-dev="ban">Buka</button></div><div class="dev-item"><span>Verifikasi</span><button type="button" data-dev="verify">Buka</button></div><div class="dev-item"><span>@everyone</span><button type="button" data-dev="everyone">Kirim</button></div><div class="dev-item"><span>Centang Manual</span><button type="button" data-dev="manualcheck">Assign</button></div><div class="dev-item"><span>Bot Tinjauan</span><button type="button" data-dev="behaviour">Lihat</button></div></div></div>` : ''}
+      `;
+      panel.querySelectorAll('.settings-item').forEach((item) => {
+        item.onclick = () => handleSettingsAction(item.dataset.action);
+      });
+      panel.querySelectorAll('[data-dev]').forEach((btn) => {
+        btn.onclick = () => openDevAction(btn.dataset.dev);
+      });
+    }
+
+    function handleSettingsAction(action) {
+      const user = getCurrentUser();
+      if (!user) return;
+      if (action === 'edit-profile') {
+        showToast('Mode edit profil dibuka');
+      }
+      if (action === 'premium') {
+        showToast('Premium coming soon');
+      }
+      if (action === 'theme') {
+        showThemePicker();
+      }
+      if (action === 'decorate') {
+        showToast('Hias profil tersedia di simulasi');
+      }
+      if (action === 'privacy') {
+        showToast('Privasi disetel ke mode simulasi');
+      }
+      if (action === 'notifications') {
+        showToast('Notifikasi aktif');
+      }
+      if (action === 'logout') {
+        state.loggedInPhone = null;
+        saveState();
+        showScreen('loginScreen');
+      }
+    }
+
+    function showThemePicker() {
+      const user = getCurrentUser();
+      const modal = document.getElementById('settingsModal');
+      const body = document.getElementById('settingsModalBody');
+      body.innerHTML = `
+        <div class="setting-section">
+          <div class="theme-grid">
+            <div class="theme-card ${user.theme === 'modern' ? 'active' : ''}" data-theme="modern">
+              <div class="theme-swatch modern"></div>
+              <strong>Modern</strong>
+            </div>
+            <div class="theme-card ${user.theme === 'kartu' ? 'active' : ''}" data-theme="kartu">
+              <div class="theme-swatch kartu"></div>
+              <strong>Kartu</strong>
+            </div>
+            <div class="theme-card ${user.theme === 'komik' ? 'active' : ''}" data-theme="komik">
+              <div class="theme-swatch komik"></div>
+              <strong>Komik</strong>
+            </div>
+          </div>
+        </div>
+      `;
+      body.querySelectorAll('.theme-card').forEach((card) => {
+        card.onclick = () => {
+          const theme = card.dataset.theme;
+          const currentUser = getCurrentUser();
+          if (currentUser) {
+            currentUser.theme = theme;
+            state.users[normalizePhone(currentUser.phone)] = currentUser;
+            saveState();
+            applyThemeToBody();
+            showToast(`Tema diubah ke ${theme}`);
+            renderSettings();
+            modal.classList.add('hidden');
+          }
+        };
+      });
+      modal.classList.remove('hidden');
+    }
+
+    function openDevAction(action) {
+      const user = getCurrentUser();
+      if (!user || user.role !== 'developer') return;
+      const body = document.getElementById('settingsModalBody');
+      if (action === 'ban') {
+        body.innerHTML = `
+          <div class="setting-section">
+            <h4 style="margin:0 0 8px;">Ban Kontak</h4>
+            <div class="field-inline">
+              <input id="banPhone" type="tel" placeholder="Nomor yang diban" />
+              <button class="primary-btn" id="banBtn" type="button">Ban</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('banBtn').onclick = () => {
+          const target = normalizePhone(document.getElementById('banPhone').value);
+          state.banning.push(target);
+          if (state.users[target]) state.users[target].banned = true;
+          saveState();
+          showToast(`Nomor ${target} diban`);
+          document.getElementById('settingsModal').classList.add('hidden');
+        };
+      }
+      if (action === 'verify') {
+        const pending = state.verificationQueue.length ? state.verificationQueue : [
+          { id: 1, type: 'group', name: 'Kelompok Seni', status: 'pending', requestedBy: '+62-81234567890' },
+          { id: 2, type: 'channel', name: 'Kanal Tips', status: 'pending', requestedBy: '+62-8112003344' }
+        ];
+        body.innerHTML = `
+          <div class="setting-section">
+            <h4 style="margin:0 0 8px;">Tinjauan Verifikasi</h4>
+            <div class="dev-list">
+              ${pending.map((item) => `
+                <div class="dev-item">
+                  <div>
+                    <strong>${item.name}</strong><br />
+                    <span class="mini-chips">${item.type} · ${item.status}</span>
+                  </div>
+                  <div class="small-actions">
+                    <button type="button" data-verify="approve-${item.id}">Approve</button>
+                    <button type="button" data-verify="reject-${item.id}">Tolak</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        body.querySelectorAll('[data-verify]').forEach((btn) => {
+          btn.onclick = () => {
+            const id = Number(btn.dataset.verify.split('-')[1]);
+            const item = pending.find((entry) => entry.id === id);
+            if (item) {
+              item.status = btn.dataset.verify.startsWith('approve') ? 'approved' : 'rejected';
+              if (btn.dataset.verify.startsWith('approve')) {
+                const user = state.users[normalizePhone(item.requestedBy)];
+                if (user) user.blueVerified = true;
+              }
+              saveState();
+              showToast(`Verifikasi ${item.name} ${item.status}`);
+              renderSettings();
+            }
+          };
+        });
+      }
+      if (action === 'everyone') {
+        const groups = state.groups.length ? state.groups : [{ name: 'Kelompok Demo', members: ['+6281234567890', '+628112003344'] }];
+        body.innerHTML = `
+          <div class="setting-section">
+            <h4 style="margin:0 0 8px;">Tag @everyone</h4>
+            <textarea id="everyoneText" rows="3" placeholder="Tulis pesan highlight"></textarea>
+            <div class="small-actions" style="margin-top:10px;">
+              <button type="button" id="sendEveryoneBtn">Kirim ke semua grup</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('sendEveryoneBtn').onclick = () => {
+          const text = document.getElementById('everyoneText').value.trim();
+          groups.forEach((group) => {
+            const convo = state.chats.find((chat) => chat.groupName === group.name);
+            if (!convo) {
+              state.chats.push({ contactPhone: `group-${group.name}`, groupName: group.name, messages: [{ id: Date.now(), sender: 'dev', type: 'text', text: `@everyone: ${text}`, time: 'now', status: 'read' }] });
+            }
+          });
+          saveState();
+          showToast('Pesan @everyone dikirim');
+          document.getElementById('settingsModal').classList.add('hidden');
+        };
+      }
+      if (action === 'manualcheck') {
+        body.innerHTML = `
+          <div class="setting-section">
+            <h4 style="margin:0 0 8px;">Centang Biru Manual</h4>
+            <div class="field-inline">
+              <input id="manualCheckPhone" type="tel" placeholder="Nomor target"/>
+              <button class="primary-btn" id="manualCheckBtn" type="button">Assign</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('manualCheckBtn').onclick = () => {
+          const target = normalizePhone(document.getElementById('manualCheckPhone').value);
+          if (state.users[target]) {
+            state.users[target].blueVerified = true;
+            saveState();
+            showToast('Centang biru ditetapkan');
+          }
+          document.getElementById('settingsModal').classList.add('hidden');
+        };
+      }
+      if (action === 'behaviour') {
+        const logs = state.suspiciousLogs.length ? state.suspiciousLogs : [
+          { id: 1, user: '+62 81234567890', log: 'Aktivitas mencurigakan: pengiriman massal', status: 'new' },
+          { id: 2, user: '+62 8112003344', log: 'Aktivitas mencurigakan: URL tidak aman', status: 'new' }
+        ];
+        body.innerHTML = `
+          <div class="setting-section">
+            <h4 style="margin:0 0 8px;">Bot Tinjauan Perilaku</h4>
+            <div class="dev-list">
+              ${logs.map((log) => `
+                <div class="dev-item">
+                  <div><strong>${log.user}</strong><br /><span class="mini-chips">${log.log}</span></div>
+                  <div class="small-actions">
+                    <button type="button" data-behaviour="ban-${log.id}">Ban</button>
+                    <button type="button" data-behaviour="ignore-${log.id}">Abaikan</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        body.querySelectorAll('[data-behaviour]').forEach((btn) => {
+          btn.onclick = () => {
+            const id = Number(btn.dataset.behaviour.split('-')[1]);
+            showToast(btn.dataset.behaviour.startsWith('ban') ? 'User diban' : 'Laporan diabaikan');
+            if (btn.dataset.behaviour.startsWith('ban')) {
+              const log = logs.find((entry) => entry.id === id);
+              if (log) state.banning.push(normalizePhone(log.user));
+            }
+            saveState();
+          };
+        });
+      }
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    document.querySelectorAll('.close-x').forEach((btn) => {
+      btn.onclick = () => {
+        document.getElementById(btn.dataset.close).classList.add('hidden');
+      };
+    });
+
+    document.querySelectorAll('.nav-item').forEach((nav) => {
+      nav.addEventListener('click', () => {
+        const tab = nav.dataset.tab;
+        if (tab === 'telepon') {
+          currentTab = 'telepon';
+          renderNav();
+          document.getElementById('teleponPanel').classList.add('active');
+          document.getElementById('chatPanel').classList.remove('active');
+          document.getElementById('updatePanel').classList.remove('active');
+          document.getElementById('saluranPanel').classList.remove('active');
+          document.getElementById('komunitasPanel').classList.remove('active');
+          document.getElementById('conversationPanel').classList.remove('active');
+          return;
+        }
+        if (tab === 'settings') {
+          currentTab = 'settings';
+          openSettings();
+          return;
+        }
+        currentTab = tab;
+        renderNav();
+        document.getElementById('chatPanel').classList.toggle('active', tab === 'chat' && !state.currentConversationId);
+        document.getElementById('updatePanel').classList.toggle('active', tab === 'update');
+        document.getElementById('saluranPanel').classList.toggle('active', tab === 'saluran');
+        document.getElementById('komunitasPanel').classList.toggle('active', tab === 'komunitas');
+        document.getElementById('teleponPanel').classList.toggle('active', tab === 'telepon');
+        document.getElementById('conversationPanel').classList.toggle('active', !!state.currentConversationId && tab === 'chat');
+      });
+    });
+
+    document.getElementById('backToChatBtn').onclick = closeConversation;
+
+    document.getElementById('addContactFab').onclick = () => {
+      const modal = document.getElementById('contactModal');
+      modal.classList.remove('hidden');
+      document.getElementById('newContactInput').value = '';
+      document.getElementById('contactLookupResult').textContent = 'Nomor belum dicari.';
+    };
+
+    document.getElementById('lookupContactBtn').onclick = () => {
+      const target = normalizePhone(document.getElementById('newContactInput').value);
+      const user = state.users[target];
+      const result = document.getElementById('contactLookupResult');
+      if (!user) {
+        result.textContent = 'Nomor ini belum terdaftar di FurinaXChat';
+        result.style.color = 'var(--danger)';
+        return;
+      }
+      result.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="chat-avatar">${user.photo ? `<img src="${user.photo}" alt="${user.name}" />` : `<span style="display:grid; place-items:center; width:100%; height:100%; font-weight:700;">${user.name.charAt(0).toUpperCase()}</span>`}</div>
+          <div>
+            <div style="font-weight:700;">${user.name}</div>
+            <div style="color:var(--muted); font-size:0.75rem;">${user.phone}</div>
+          </div>
+        </div>
+        <button class="primary-btn" id="saveContactBtn" type="button" style="margin-top:12px;">Simpan Kontak</button>
+      `;
+      document.getElementById('saveContactBtn').onclick = () => {
+        state.contacts[target] = { phone: user.phone, name: user.name, photo: user.photo || '', blueVerified: user.blueVerified || false };
+        saveState();
+        renderContactList();
+        document.getElementById('contactModal').classList.add('hidden');
+      };
+    };
+
+    document.getElementById('profileImageInput').onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('profilePreview').src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    document.getElementById('uploadBox').onclick = () => document.getElementById('profileImageInput').click();
+
+    document.getElementById('sendMessageBtn').onclick = sendMessage;
+    document.getElementById('messageInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById('voiceButton').onclick = () => {
+      const phone = state.currentConversationId;
+      if (!phone) return;
+      const conversation = getConversationByPhone(phone) || { contactPhone: phone, messages: [] };
+      const msg = { id: Date.now(), sender: 'me', type: 'voice', text: '', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), status: 'sent' };
+      conversation.messages.push(msg);
+      (!state.chats.find((chat) => chat.contactPhone === phone)) ? state.chats.push(conversation) : Object.assign(state.chats[state.chats.findIndex((chat) => chat.contactPhone === phone)], conversation);
+      saveState();
+      renderContactList();
+      renderConversation();
+    };
+
+    document.getElementById('mediaImageInput').onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingMedia = { type: 'image', data: reader.result };
+        sendMessage();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    document.getElementById('mediaVideoInput').onchange = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingMedia = { type: 'video', data: reader.result };
+        sendMessage();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    document.querySelectorAll('.otp-box').forEach((box, index, arr) => {
+      box.addEventListener('input', (event) => {
+        const value = event.target.value.replace(/\D/g, '').slice(0, 1);
+        event.target.value = value;
+        event.target.classList.add('filled');
+        if (value && index < arr.length - 1) arr[index + 1].focus();
+      });
+      box.addEventListener('keydown', (event) => {
+        if (event.key === 'Backspace' && !box.value && index > 0) {
+          arr[index - 1].focus();
+        }
+      });
+    });
+
+    ensureSeedUsers();
+    applyThemeToBody();
+    renderAll();
+    showScreen('introScreen');
+  </script>
+</body>
+</html>
